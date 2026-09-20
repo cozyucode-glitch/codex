@@ -57,6 +57,14 @@ jobs:
           echo "### Temporary public URL" >> "$GITHUB_STEP_SUMMARY"
           echo "$URL" >> "$GITHUB_STEP_SUMMARY"
           echo "Temporary URL: $URL"
+          printf '%s\n' "$URL" > temp-url.txt
+
+      - name: Publish temporary URL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: temporary-public-url
+          path: temp-url.txt
+          retention-days: 1
 
       - name: Verify public endpoint
         run: |
