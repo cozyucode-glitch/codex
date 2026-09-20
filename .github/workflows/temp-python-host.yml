@@ -1,9 +1,6 @@
 name: Temporary Python Greeting Server
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
