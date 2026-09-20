@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>웹 계산기</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="calculator-shell">
+    <section class="calculator" aria-label="웹 계산기">
+      <div class="display" aria-live="polite" aria-atomic="true">
+        <div id="history" class="history" aria-label="이전 계산"></div>
+        <output id="display" class="result" aria-label="현재 값">0</output>
+      </div>
+
+      <div class="keypad" role="group" aria-label="계산기 키패드">
+        <button class="key key-function" data-action="clear" type="button">AC</button>
+        <button class="key key-function" data-action="sign" type="button">±</button>
+        <button class="key key-function" data-action="percent" type="button">%</button>
+        <button class="key key-operator" data-operator="/" type="button" aria-label="나누기">÷</button>
+
+        <button class="key" data-number="7" type="button">7</button>
+        <button class="key" data-number="8" type="button">8</button>
+        <button class="key" data-number="9" type="button">9</button>
+        <button class="key key-operator" data-operator="*" type="button" aria-label="곱하기">×</button>
+
+        <button class="key" data-number="4" type="button">4</button>
+        <button class="key" data-number="5" type="button">5</button>
+        <button class="key" data-number="6" type="button">6</button>
+        <button class="key key-operator" data-operator="-" type="button" aria-label="빼기">−</button>
+
+        <button class="key" data-number="1" type="button">1</button>
+        <button class="key" data-number="2" type="button">2</button>
+        <button class="key" data-number="3" type="button">3</button>
+        <button class="key key-operator" data-operator="+" type="button" aria-label="더하기">+</button>
+
+        <button class="key key-wide" data-number="0" type="button">0</button>
+        <button class="key" data-action="decimal" type="button">.</button>
+        <button class="key key-equals" data-action="equals" type="button" aria-label="계산 결과">=</button>
+      </div>
+
+      <p class="hint">키보드의 숫자, + − × ÷, Enter, Backspace, Esc도 사용할 수 있습니다.</p>
+    </section>
+  </main>
+
+  <script src="calculator-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
