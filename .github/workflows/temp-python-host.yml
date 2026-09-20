@@ -1,0 +1,82 @@
+name: Temporary Python Greeting Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Start Python server
+        run: |
+          python app.py > app.log 2>&1 &
+          echo $! > app.pid
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8080/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat app.log
+          exit 1
+
+      - name: Start Cloudflare Quick Tunnel
+        run: |
+          curl --fail --location --output cloudflared \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+          chmod +x cloudflared
+          ./cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8080 > tunnel.log 2>&1 &
+          echo $! > tunnel.pid
+
+          URL=""
+          for i in {1..60}; do
+            URL=$(grep -oE 'https://[-a-z0-9]+\.trycloudflare\.com' tunnel.log | head -n 1 || true)
+            if [ -n "$URL" ]; then
+              break
+            fi
+            sleep 1
+          done
+
+          if [ -z "$URL" ]; then
+            cat tunnel.log
+            exit 1
+          fi
+
+          echo "TEMP_URL=$URL" >> "$GITHUB_ENV"
+          echo "### Temporary public URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "$URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Temporary URL: $URL"
+
+      - name: Verify public endpoint
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent "$TEMP_URL" | grep -q '이름을 입력하세요'; then
+              echo "Public endpoint is ready: $TEMP_URL"
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Keep temporary server alive
+        run: |
+          echo "Temporary server: $TEMP_URL"
+          echo "This job will keep the tunnel alive until the job timeout."
+          while kill -0 "$(cat tunnel.pid)" 2>/dev/null && kill -0 "$(cat app.pid)" 2>/dev/null; do
+            sleep 60
+          done
+          echo "Server or tunnel stopped unexpectedly."
+          cat app.log || true
+          cat tunnel.log || true
+          exit 1
